@@ -4,6 +4,7 @@ import CipherForm from "./components/CipherForm";
 import OutputDecrypt from "./components/OutputDecrypt";
 import OutputEncrypt from "./components/OutputEncrypt";
 import ScrambleText from "./components/ScrambleText";
+import CopyButton from "./components/CopyButton"; // Import CopyButton
 import {
   vigenereEncrypt,
   vigenereDecrypt,
@@ -202,22 +203,28 @@ function App() {
           </>
         )}
 
-        {/* Rail Fence Pattern Visualization */}
+        {/* Rail Fence Pattern Visualization with Copy Button */}
         {railFencePattern && (
           <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 transition-all duration-300">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">Rail Fence Pattern:</h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">Rail Fence Pattern:</h3>
+              <CopyButton text={railFencePattern} />
+            </div>
             <pre className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg overflow-auto text-gray-800 dark:text-gray-100 font-mono">
               {railFencePattern}
             </pre>
           </div>
         )}
 
-        {/* Show Rail Fence results in a specific format when using Rail Fence cipher */}
+        {/* Show Rail Fence results in a specific format when using Rail Fence cipher with Copy Button */}
         {cipherType === "railfence" && (displayEncrypted || displayDecrypted) && (
           <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 transition-all duration-300">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">
-              {displayEncrypted ? "Encrypted Text:" : "Decrypted Text:"}
-            </h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">
+                {displayEncrypted ? "Encrypted Text:" : "Decrypted Text:"}
+              </h3>
+              <CopyButton text={displayEncrypted ? cipherText : plainText} />
+            </div>
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-gray-800 dark:text-gray-100 break-words">
               {displayEncrypted ? cipherText : plainText}
             </div>
