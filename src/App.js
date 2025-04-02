@@ -18,6 +18,19 @@ import {
   hillDecrypt,
   superDecrypt,
   superEncrypt,
+  caesarEncrypt,
+  caesarDecrypt,
+  encodeRailFenceCipher,
+  decodeRailFenceCipher,
+  visualizeRailFenceCipher,
+  atbashEncrypt,
+  atbashDecrypt,
+  morseEncode,
+  morseDecode,
+  rot13Encrypt,
+  rot13Decrypt,
+  baconianEncrypt,
+  baconianDecrypt,
 } from "./utils/ciphers";
 
 function App() {
@@ -31,132 +44,106 @@ function App() {
     [1, 0],
     [0, 1],
   ]);
-  const [displayEncrypted, setDisplayEncrypted] = useState(false); // Fixed
-  const [displayDecrypted, setDisplayDecrypted] = useState(false); // Fixed
+  const [railFenceKey, setRailFenceKey] = useState(2); // Default to 2 rails
+  const [displayEncrypted, setDisplayEncrypted] = useState(false);
+  const [displayDecrypted, setDisplayDecrypted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [vigenereKey, setVigenereKey] = useState("");
   const [transpositionKey, setTranspositionKey] = useState("");
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "light";
-  });
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
+  const [railFencePattern, setRailFencePattern] = useState("");
 
   useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
+  const toggleTheme = () => setTheme((prev) => (prev === "light" ? "dark" : "light"));
 
-  const handleAffineKeyChange = (type, value) => {
+  const handleKeyChange = (type, value) => {
     if (type === "a") setA(value);
     if (type === "b") setB(value);
   };
 
   const handleHillKeyChange = (row, col, value) => {
-    const updatedKey = [...hillKey];
-    updatedKey[row][col] = value;
-    setHillKey(updatedKey);
+    setHillKey((prev) => {
+      const updatedKey = [...prev];
+      updatedKey[row][col] = value;
+      return updatedKey;
+    });
   };
 
-  const handleEncrypt = () => {
+  const handleRailFenceKeyChange = (key) => {
+    setRailFenceKey(key);
+    console.log("Rail Fence Key:", key); // Optional: For debugging
+  };
+
+  const resetDisplay = () => {
+    setDisplayEncrypted(false);
     setDisplayDecrypted(false);
+  };
+
+  const processCipher = (action) => {
+    resetDisplay();
     setErrorMessage("");
+    setRailFencePattern(""); // Clear any previous pattern
+
     try {
-      let encryptedText;
-      switch (cipherType) {
-        case "vigenere":
-          encryptedText = vigenereEncrypt(plainText, key);
-          break;
-        case "autokey":
-          encryptedText = autokeyVigenereEncrypt(plainText, key);
-          break;
-        case "extended":
-          encryptedText = extendedVigenereEncrypt(plainText, key);
-          break;
-        case "playfair":
-          encryptedText = playfairEncrypt(plainText, key);
-          break;
-        case "affine":
-          encryptedText = affineEncrypt(plainText, a, b);
-          break;
-        case "hill":
-          encryptedText = hillEncrypt(plainText, hillKey);
-          break;
-        case "super":
-          encryptedText = superEncrypt(
-            plainText,
-            vigenereKey,
-            transpositionKey
-          );
-          break;
-        default:
-          encryptedText = "Cipher tidak ditemukan";
+      const cipherFunctions = {
+        vigenere: action === "encrypt" ? vigenereEncrypt : vigenereDecrypt,
+        autokey: action === "encrypt" ? autokeyVigenereEncrypt : autokeyVigenereDecrypt,
+        extended: action === "encrypt" ? extendedVigenereEncrypt : extendedVigenereDecrypt,
+        playfair: action === "encrypt" ? playfairEncrypt : playfairDecrypt,
+        affine: action === "encrypt" ? affineEncrypt : affineDecrypt,
+        hill: action === "encrypt" ? hillEncrypt : hillDecrypt,
+        super: action === "encrypt" ? superEncrypt : superDecrypt,
+        caesar: action === "encrypt" ? caesarEncrypt : caesarDecrypt,
+        railfence: action === "encrypt" ? encodeRailFenceCipher : decodeRailFenceCipher,
+        atbash: action === "encrypt" ? atbashEncrypt : atbashDecrypt,
+        morse: action === "encrypt" ? morseEncode : morseDecode,
+        rot13: action === "encrypt" ? rot13Encrypt : rot13Decrypt,
+        baconian: action === "encrypt" ? baconianEncrypt : baconianDecrypt,
+      };
+
+      const text = action === "encrypt" ? plainText : cipherText;
+      const result =
+        cipherType === "affine"
+          ? cipherFunctions[cipherType](text, a, b)
+          : cipherType === "hill"
+          ? cipherFunctions[cipherType](text, hillKey)
+          : cipherType === "super"
+          ? cipherFunctions[cipherType](text, vigenereKey, transpositionKey)
+          : cipherType === "caesar"
+          ? cipherFunctions[cipherType](text, parseInt(key))
+          : cipherType === "railfence"
+          ? cipherFunctions[cipherType](text, railFenceKey) // Use railFenceKey instead of parseInt(key)
+          : cipherFunctions[cipherType](text, key);
+
+      // Generate Rail Fence visualization if applicable
+      if (cipherType === "railfence" && action === "encrypt") {
+        const pattern = visualizeRailFenceCipher(plainText, railFenceKey);
+        setRailFencePattern(pattern);
       }
-      setCipherText(encryptedText);
-      setDisplayEncrypted(true);
-      setDisplayDecrypted(false);
+
+      if (action === "encrypt") {
+        setCipherText(result);
+        setDisplayEncrypted(true);
+      } else {
+        setPlainText(result);
+        setDisplayDecrypted(true);
+      }
     } catch (error) {
       setErrorMessage(error.message);
     }
-  };
-
-  const handleDecrypt = () => {
-    setDisplayEncrypted(false);
-    setErrorMessage("");
-    try {
-      let decryptedText;
-      switch (cipherType) {
-        case "vigenere":
-          decryptedText = vigenereDecrypt(cipherText, key);
-          break;
-        case "autokey":
-          decryptedText = autokeyVigenereDecrypt(cipherText, key);
-          break;
-        case "extended":
-          decryptedText = extendedVigenereDecrypt(cipherText, key);
-          break;
-        case "playfair":
-          decryptedText = playfairDecrypt(cipherText, key);
-          break;
-        case "affine":
-          decryptedText = affineDecrypt(cipherText, a, b);
-          break;
-        case "hill":
-          decryptedText = hillDecrypt(cipherText, hillKey);
-          break;
-        case "super":
-          decryptedText = superDecrypt(
-            cipherText,
-            vigenereKey,
-            transpositionKey
-          );
-          break;
-        default:
-          decryptedText = "Cipher tidak ditemukan";
-      }
-      setPlainText(decryptedText);
-      setDisplayDecrypted(true);
-      setDisplayEncrypted(false);
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-  };
-
-  const handleInputChange = () => {
-    setDisplayEncrypted(false);
-    setDisplayDecrypted(false);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-      <div className="flex justify-between items-center w-full max-w-3xl mx-auto px-8 pt-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
+      <header className="flex justify-between items-center w-full max-w-3xl mx-auto px-8 pt-8">
+        <h1
+          onClick={() => window.location.reload()}
+          className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 cursor-pointer hover:from-indigo-500 hover:to-purple-500 transition-all duration-200"
+        >
           CipherHub
         </h1>
         <button
@@ -165,46 +152,74 @@ function App() {
         >
           {theme === "light" ? "🌙 Dark" : "☀️ Light"}
         </button>
-      </div>
+      </header>
       <main className="flex-1 w-full max-w-3xl mx-auto px-8 py-8 space-y-8">
         <UploadForm
           onUpload={setPlainText}
           onTextChange={(text) => {
             setPlainText(text);
-            handleInputChange();
+            resetDisplay();
           }}
         />
         <CipherForm
           onCipherChange={(cipher) => {
             setCipherType(cipher);
-            handleInputChange();
+            resetDisplay();
           }}
           onKeyChange={(key) => {
             setKey(key);
-            handleInputChange();
+            resetDisplay();
           }}
           onVigenereKeyChange={(key) => {
             setVigenereKey(key);
-            handleInputChange();
+            resetDisplay();
           }}
           onTranspositionKeyChange={(key) => {
             setTranspositionKey(key);
-            handleInputChange();
+            resetDisplay();
           }}
           onAffineKeyChange={(type, value) => {
-            handleAffineKeyChange(type, value);
-            handleInputChange();
+            handleKeyChange(type, value);
+            resetDisplay();
           }}
           onHillKeyChange={(row, col, value) => {
             handleHillKeyChange(row, col, value);
-            handleInputChange();
+            resetDisplay();
           }}
-          onAction={(action) =>
-            action === "encrypt" ? handleEncrypt() : handleDecrypt()
-          }
+          onRailFenceKeyChange={handleRailFenceKeyChange}
+          onAction={processCipher}
         />
-        <OutputEncrypt cipherText={cipherText} display={displayEncrypted} />
-        <OutputDecrypt plainText={plainText} display={displayDecrypted} />
+        
+        {/* Only show regular output components if not using Rail Fence cipher */}
+        {cipherType !== "railfence" && (
+          <>
+            <OutputEncrypt cipherText={cipherText} display={displayEncrypted} />
+            <OutputDecrypt plainText={plainText} display={displayDecrypted} />
+          </>
+        )}
+
+        {/* Rail Fence Pattern Visualization */}
+        {railFencePattern && (
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 transition-all duration-300">
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">Rail Fence Pattern:</h3>
+            <pre className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg overflow-auto text-gray-800 dark:text-gray-100 font-mono">
+              {railFencePattern}
+            </pre>
+          </div>
+        )}
+
+        {/* Show Rail Fence results in a specific format when using Rail Fence cipher */}
+        {cipherType === "railfence" && (displayEncrypted || displayDecrypted) && (
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 transition-all duration-300">
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100 mb-3">
+              {displayEncrypted ? "Encrypted Text:" : "Decrypted Text:"}
+            </h3>
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-gray-800 dark:text-gray-100 break-words">
+              {displayEncrypted ? cipherText : plainText}
+            </div>
+          </div>
+        )}
+
         {errorMessage && (
           <p className="text-red-600 dark:text-red-400 mt-6 text-center font-medium bg-red-50 dark:bg-red-900/30 py-3 px-6 rounded-lg shadow-md">
             {errorMessage}

@@ -8,17 +8,31 @@ function CipherForm({
   onAction,
   onVigenereKeyChange,
   onTranspositionKeyChange,
+  onRailFenceKeyChange,
 }) {
   const [isAffine, setIsAffine] = useState(false);
   const [isHill, setIsHill] = useState(false);
   const [isSuper, setIsSuper] = useState(false);
+  const [isCaesar, setIsCaesar] = useState(false);
+  const [isRailFence, setIsRailFence] = useState(false);
+  const [selectedCipher, setSelectedCipher] = useState("vigenere");
+  
+  // Define ciphers that don't need keys
+  const noKeyRequired = ["atbash", "rot13"];
 
   const handleCipherChange = (e) => {
-    const selectedCipher = e.target.value;
-    setIsAffine(selectedCipher === "affine");
-    setIsHill(selectedCipher === "hill");
-    setIsSuper(selectedCipher === "super");
-    onCipherChange(selectedCipher);
+    const cipher = e.target.value;
+    setSelectedCipher(cipher);
+    setIsAffine(cipher === "affine");
+    setIsHill(cipher === "hill");
+    setIsSuper(cipher === "super");
+    setIsCaesar(cipher === "caesar");
+    setIsRailFence(cipher === "railfence");
+    onCipherChange(cipher);
+  };
+
+  const needsKeyInput = () => {
+    return !isAffine && !isHill && !isSuper && !isRailFence && !noKeyRequired.includes(selectedCipher);
   };
 
   return (
@@ -34,6 +48,12 @@ function CipherForm({
         <option value="affine">Affine Cipher</option>
         <option value="hill">Hill Cipher</option>
         <option value="super">Super Enkripsi (Base64)</option>
+        <option value="caesar">Caesar Cipher</option>
+        <option value="railfence">Rail Fence Cipher</option>
+        <option value="atbash">Atbash Cipher</option>
+        <option value="morse">Morse Code</option>
+        <option value="rot13">ROT13 Cipher</option>
+        <option value="baconian">Baconian Cipher</option>
       </select>
 
       {isSuper && (
@@ -53,10 +73,10 @@ function CipherForm({
         </div>
       )}
 
-      {!isAffine && !isHill && !isSuper && (
+      {needsKeyInput() && (
         <input
           type="text"
-          placeholder="Masukkan kunci"
+          placeholder={isCaesar ? "Insert key number ex=3" : "Masukkan kunci"}
           onChange={(e) => onKeyChange(e.target.value)}
           className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200 animate-fade-in"
         />
@@ -106,6 +126,15 @@ function CipherForm({
             className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
           />
         </div>
+      )}
+
+      {isRailFence && (
+        <input
+          type="number"
+          placeholder="Masukkan jumlah rel"
+          onChange={(e) => onRailFenceKeyChange(parseInt(e.target.value))}
+          className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200 animate-fade-in"
+        />
       )}
 
       <div className="flex space-x-4">

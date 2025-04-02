@@ -367,3 +367,251 @@ export function superDecrypt(cipherText, vigenereKey, transpositionKey) {
   const decryptedText = extendedVigenereDecryptForSuper(base64Decoded, vigenereKey);
   return decryptedText;
 }
+
+// Caesar Cipher
+export const caesarEncrypt = (text, shift) => {
+  return text
+    .split("")
+    .map((char) => {
+      if (char.match(/[a-z]/i)) {
+        const charCode = char.charCodeAt(0);
+        const base = charCode >= 65 && charCode <= 90 ? 65 : 97;
+        return String.fromCharCode(((charCode - base + shift) % 26) + base);
+      }
+      return char;
+    })
+    .join("");
+};
+
+export const caesarDecrypt = (text, shift) => {
+  return caesarEncrypt(text, 26 - (shift % 26));
+};
+
+/**
+ * Encodes a given string using the Rail Fence Cipher.
+ * @param text - The input text to encode.
+ * @param rails - The number of rails to use.
+ * @returns The encoded string.
+ */
+export function encodeRailFenceCipher(text, rails) {
+  if (!Number.isInteger(rails) || rails < 1) {
+    throw new Error("Invalid number of rails. It must be an integer greater than or equal to 1.");
+  }
+  if (rails === 1) return text;
+
+  const fence = Array.from({ length: rails }, () => []);
+  let rail = 0;
+  let direction = 1;
+
+  for (const char of text) {
+    fence[rail].push(char);
+    rail += direction;
+    if (rail === 0 || rail === rails - 1) direction *= -1;
+  }
+
+  return fence.flat().join('');
+}
+
+/**
+ * Decodes a given string encoded with the Rail Fence Cipher.
+ * @param cipherText - The encoded text to decode.
+ * @param rails - The number of rails used during encoding.
+ * @returns The decoded string.
+ */
+export function decodeRailFenceCipher(cipherText, rails) {
+  if (!Number.isInteger(rails) || rails < 1) {
+    throw new Error("Invalid number of rails. It must be an integer greater than or equal to 1.");
+  }
+  if (rails === 1) return cipherText;
+
+  const fence = Array.from({ length: rails }, () => Array(cipherText.length).fill(false));
+  let rail = 0;
+  let direction = 1;
+
+  // Mark the positions on the fence
+  for (let i = 0; i < cipherText.length; i++) {
+    fence[rail][i] = true;
+    rail += direction;
+    if (rail === 0 || rail === rails - 1) direction *= -1;
+  }
+
+  // Fill the fence with the cipher text
+  let index = 0;
+  for (let r = 0; r < rails; r++) {
+    for (let c = 0; c < cipherText.length; c++) {
+      if (fence[r][c]) {
+        fence[r][c] = cipherText[index++];
+      }
+    }
+  }
+
+  // Read the fence to decode
+  const result = [];
+  rail = 0;
+  direction = 1;
+  for (let i = 0; i < cipherText.length; i++) {
+    result.push(fence[rail][i]);
+    rail += direction;
+    if (rail === 0 || rail === rails - 1) direction *= -1;
+  }
+
+  return result.join('');
+}
+
+/**
+ * Visualizes how text is arranged in the Rail Fence Cipher pattern.
+ * @param text - The input text.
+ * @param rails - The number of rails to use.
+ * @returns A string representation of the Rail Fence pattern.
+ */
+export function visualizeRailFenceCipher(text, rails) {
+  if (!Number.isInteger(rails) || rails < 1) {
+    throw new Error("Invalid number of rails. It must be an integer greater than or equal to 1.");
+  }
+  if (rails === 1 || text.length === 0) return text;
+
+  const fence = Array.from({ length: rails }, () => Array(text.length).fill(' '));
+  let rail = 0;
+  let direction = 1;
+
+  // Fill the pattern with characters
+  for (let i = 0; i < text.length; i++) {
+    fence[rail][i] = text[i];
+    rail += direction;
+    if (rail === 0 || rail === rails - 1) direction *= -1;
+  }
+
+  // Convert the 2D array to a string representation
+  return fence.map(row => row.join('')).join('\n');
+}
+
+// Atbash Cipher
+export function atbashEncrypt(plainText) {
+  let result = "";
+  plainText = plainText.toUpperCase();
+  for (let i = 0; i < plainText.length; i++) {
+    const c = plainText.charCodeAt(i);
+    if (c >= 65 && c <= 90) {
+      // A=65, Z=90 in ASCII
+      result += String.fromCharCode(155 - c); // 155 = 65 + 90
+    } else {
+      result += plainText[i];
+    }
+  }
+  return result;
+}
+
+export function atbashDecrypt(cipherText) {
+  // Atbash is its own inverse - the encryption method is the same as decryption
+  return atbashEncrypt(cipherText);
+}
+
+// Morse Code
+const morseCodeMap = {
+  'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....', 
+  'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 
+  'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 
+  'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-', 
+  '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.', '.': '.-.-.-', ',': '--..--',
+  '?': '..--..', "'": '.----.', '!': '-.-.--', '/': '-..-.', '(': '-.--.', ')': '-.--.-', '&': '.-...',
+  ':': '---...', ';': '-.-.-.', '=': '-...-', '+': '.-.-.', '-': '-....-', '_': '..--.-', '"': '.-..-.',
+  '$': '...-..-', '@': '.--.-.'
+};
+
+const reverseMorseCodeMap = Object.fromEntries(
+  Object.entries(morseCodeMap).map(([key, value]) => [value, key])
+);
+
+export function morseEncode(plainText) {
+  let result = [];
+  plainText = plainText.toUpperCase();
+  for (let i = 0; i < plainText.length; i++) {
+    const char = plainText[i];
+    if (morseCodeMap[char]) {
+      result.push(morseCodeMap[char]);
+    } else if (char === ' ') {
+      // Use '/' to represent word separators
+      result.push('/');
+    }
+  }
+  return result.join(' ');
+}
+
+export function morseDecode(cipherText) {
+  // Split by spaces to get morse characters
+  const words = cipherText.split(' ');
+  let result = "";
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (word === '/') {
+      result += ' ';
+    } else if (reverseMorseCodeMap[word]) {
+      result += reverseMorseCodeMap[word];
+    }
+  }
+  return result;
+}
+
+// ROT13 Cipher
+export function rot13Encrypt(plainText) {
+  return plainText
+    .split("")
+    .map((char) => {
+      const code = char.charCodeAt(0);
+      // Uppercase letters
+      if (code >= 65 && code <= 90) {
+        return String.fromCharCode(((code - 65 + 13) % 26) + 65);
+      }
+      // Lowercase letters
+      else if (code >= 97 && code <= 122) {
+        return String.fromCharCode(((code - 97 + 13) % 26) + 97);
+      }
+      // Other characters remain unchanged
+      return char;
+    })
+    .join("");
+}
+
+export function rot13Decrypt(cipherText) {
+  // ROT13 is its own inverse - applying it twice returns the original text
+  return rot13Encrypt(cipherText);
+}
+
+// Baconian Cipher
+const baconianMap = {
+  'A': 'aaaaa', 'B': 'aaaab', 'C': 'aaaba', 'D': 'aaabb', 'E': 'aabaa',
+  'F': 'aabab', 'G': 'aabba', 'H': 'aabbb', 'I': 'abaaa', 'J': 'abaab',
+  'K': 'ababa', 'L': 'ababb', 'M': 'abbaa', 'N': 'abbab', 'O': 'abbba',
+  'P': 'abbbb', 'Q': 'baaaa', 'R': 'baaab', 'S': 'baaba', 'T': 'baabb',
+  'U': 'babaa', 'V': 'babab', 'W': 'babba', 'X': 'babbb', 'Y': 'bbaaa',
+  'Z': 'bbaab'
+};
+
+const reverseBaconianMap = Object.fromEntries(
+  Object.entries(baconianMap).map(([key, value]) => [value, key])
+);
+
+export function baconianEncrypt(plainText) {
+  let result = "";
+  plainText = plainText.toUpperCase().replace(/[^A-Z]/g, "");
+  for (let i = 0; i < plainText.length; i++) {
+    if (baconianMap[plainText[i]]) {
+      result += baconianMap[plainText[i]] + " ";
+    }
+  }
+  return result.trim();
+}
+
+export function baconianDecrypt(cipherText) {
+  // Remove any characters that aren't 'A', 'B', 'a', or 'b'
+  cipherText = cipherText.toLowerCase().replace(/[^ab]/g, "");
+  let result = "";
+  // Process in groups of 5 characters
+  for (let i = 0; i < cipherText.length; i += 5) {
+    const chunk = cipherText.substr(i, 5);
+    if (chunk.length === 5 && reverseBaconianMap[chunk]) {
+      result += reverseBaconianMap[chunk];
+    }
+  }
+  return result;
+}
