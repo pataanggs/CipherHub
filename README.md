@@ -22,7 +22,7 @@ CipherHub is a web-based application for encrypting and decrypting text using va
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/CipherHub.git
+   git clone https://github.com/pataanggs/CipherHub.git
    cd CipherHub
    ```
 
