@@ -3,6 +3,7 @@ import UploadForm from "./components/UploadForm";
 import CipherForm from "./components/CipherForm";
 import OutputDecrypt from "./components/OutputDecrypt";
 import OutputEncrypt from "./components/OutputEncrypt";
+import ScrambleText from "./components/ScrambleText";
 import {
   vigenereEncrypt,
   vigenereDecrypt,
@@ -142,9 +143,12 @@ function App() {
       <header className="flex justify-between items-center w-full max-w-3xl mx-auto px-8 pt-8">
         <h1
           onClick={() => window.location.reload()}
-          className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 cursor-pointer hover:from-indigo-500 hover:to-purple-500 transition-all duration-200"
+          className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight cursor-pointer transition-all duration-200"
         >
-          CipherHub
+          <ScrambleText 
+            text="CipherHub"
+            className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 hover:from-indigo-500 hover:to-purple-500"
+          />
         </h1>
         <button
           onClick={toggleTheme}

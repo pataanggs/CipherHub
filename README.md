@@ -21,22 +21,26 @@ CipherHub is a web-based application for encrypting and decrypting text using va
 ## Installation
 
 1. Clone the repository:
-   ```
+
+   ```bash
    git clone https://github.com/pataanggs/CipherHub.git
    cd CipherHub
    ```
 
 2. Install dependencies:
-   ```
+
+   ```bash
    npm install
    ```
 
 3. Start the development server:
-   ```
+
+   ```bash
+   npm run dev
+
+   ```bash
    npm run dev
    ```
-
-4. Open your browser and navigate to `http://localhost:3000`
 
 ## Usage
 
@@ -47,6 +51,7 @@ CipherHub is a web-based application for encrypting and decrypting text using va
 5. View the result in the output area
 
 For file encryption:
+
 1. Click on the "Upload File" button
 2. Select a text file from your computer
 3. The file contents will be loaded into the input field
