@@ -31,17 +31,15 @@ function App() {
     [1, 0],
     [0, 1],
   ]);
-  const [, setDisplayEncrypted] = useState(false);
-  const [, setDisplayDecrypted] = useState(false);
+  const [displayEncrypted, setDisplayEncrypted] = useState(false); // Fixed
+  const [displayDecrypted, setDisplayDecrypted] = useState(false); // Fixed
   const [errorMessage, setErrorMessage] = useState("");
   const [vigenereKey, setVigenereKey] = useState("");
   const [transpositionKey, setTranspositionKey] = useState("");
   const [theme, setTheme] = useState(() => {
-    // Load theme from localStorage or default to light
     return localStorage.getItem("theme") || "light";
   });
 
-  // Persist theme to localStorage and update document class
   useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
@@ -156,8 +154,8 @@ function App() {
   };
 
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen flex flex-col items-center transition-colors duration-300">
-      <div className="flex justify-between items-center w-full max-w-3xl mb-8">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+      <div className="flex justify-between items-center w-full max-w-3xl mx-auto px-8 pt-8">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
           CipherHub
         </h1>
@@ -168,7 +166,7 @@ function App() {
           {theme === "light" ? "🌙 Dark" : "☀️ Light"}
         </button>
       </div>
-      <div className="max-w-3xl w-full mx-auto space-y-8 flex-1">
+      <main className="flex-1 w-full max-w-3xl mx-auto px-8 py-8 space-y-8">
         <UploadForm
           onUpload={setPlainText}
           onTextChange={(text) => {
@@ -205,15 +203,15 @@ function App() {
             action === "encrypt" ? handleEncrypt() : handleDecrypt()
           }
         />
-        <OutputEncrypt cipherText={cipherText} plainText={plainText} />
-        <OutputDecrypt cipherText={cipherText} plainText={plainText} />
+        <OutputEncrypt cipherText={cipherText} display={displayEncrypted} />
+        <OutputDecrypt plainText={plainText} display={displayDecrypted} />
         {errorMessage && (
           <p className="text-red-600 dark:text-red-400 mt-6 text-center font-medium bg-red-50 dark:bg-red-900/30 py-3 px-6 rounded-lg shadow-md">
             {errorMessage}
           </p>
         )}
-      </div>
-      <footer className="mt-12 py-6 w-full bg-gray-800 dark:bg-gray-950 text-gray-200 dark:text-gray-300 text-center">
+      </main>
+      <footer className="py-6 w-full bg-gray-800 dark:bg-gray-950 text-gray-200 dark:text-gray-300 text-center">
         <p className="text-sm">
           Created by{" "}
           <a

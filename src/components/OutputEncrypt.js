@@ -1,6 +1,8 @@
 import React from "react";
 
-function OutputEncrypt({ cipherText }) {
+function OutputEncrypt({ cipherText, display }) {
+  if (!display) return null; // Don't render if display is false
+
   return (
     <div className="mt-6 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 transition-all duration-300 hover:shadow-xl">
       <h3 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4 tracking-tight text-center">
