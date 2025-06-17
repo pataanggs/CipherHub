@@ -2,25 +2,28 @@ import React from "react";
 import CopyButton from "./CopyButton";
 
 function OutputEncrypt({ cipherText, display }) {
-  if (!display) return null; // Don't render if display is false
+  if (!display) return null;
 
   return (
-    <div className="mt-6 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 transition-all duration-300 hover:shadow-xl">
-      <h3 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4 tracking-tight text-center">
-        Hasil Enkripsi:
-      </h3>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          Encrypted Text
+        </h3>
+        <CopyButton text={cipherText} />
+      </div>
       <div className="relative">
-        <textarea
-          readOnly
-          value={cipherText || ""}
-          placeholder="Hasil enkripsi akan muncul di sini"
-          className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200 resize-none min-h-[120px]"
-        />
-        {cipherText && (
-          <div className="absolute top-3 right-3">
-            <CopyButton text={cipherText} />
-          </div>
-        )}
+        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-gray-800 dark:text-gray-200 break-words font-mono text-sm">
+          {cipherText}
+        </div>
+        <div className="absolute top-2 right-2">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+            Encrypted
+          </span>
+        </div>
+      </div>
+      <div className="text-xs text-gray-500 dark:text-gray-400">
+        The text has been encrypted using your selected cipher method.
       </div>
     </div>
   );

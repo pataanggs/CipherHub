@@ -4,7 +4,7 @@ import CipherForm from "./components/CipherForm";
 import OutputDecrypt from "./components/OutputDecrypt";
 import OutputEncrypt from "./components/OutputEncrypt";
 import ScrambleText from "./components/ScrambleText";
-import CopyButton from "./components/CopyButton"; // Import CopyButton
+import CopyButton from "./components/CopyButton";
 import {
   vigenereEncrypt,
   vigenereDecrypt,
@@ -140,116 +140,153 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-      <header className="flex justify-between items-center w-full max-w-3xl mx-auto px-8 pt-8">
-        <h1
-          onClick={() => window.location.reload()}
-          className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight cursor-pointer transition-all duration-200"
-        >
-          <ScrambleText 
-            text="CipherHub"
-            className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 hover:from-indigo-500 hover:to-purple-500"
-          />
-        </h1>
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        >
-          {theme === "light" ? "🌙 Dark" : "☀️ Light"}
-        </button>
-      </header>
-      <main className="flex-1 w-full max-w-3xl mx-auto px-8 py-8 space-y-8">
-        <UploadForm
-          onUpload={setPlainText}
-          onTextChange={(text) => {
-            setPlainText(text);
-            resetDisplay();
-          }}
-        />
-        <CipherForm
-          onCipherChange={(cipher) => {
-            setCipherType(cipher);
-            resetDisplay();
-          }}
-          onKeyChange={(key) => {
-            setKey(key);
-            resetDisplay();
-          }}
-          onVigenereKeyChange={(key) => {
-            setVigenereKey(key);
-            resetDisplay();
-          }}
-          onTranspositionKeyChange={(key) => {
-            setTranspositionKey(key);
-            resetDisplay();
-          }}
-          onAffineKeyChange={(type, value) => {
-            handleKeyChange(type, value);
-            resetDisplay();
-          }}
-          onHillKeyChange={(row, col, value) => {
-            handleHillKeyChange(row, col, value);
-            resetDisplay();
-          }}
-          onRailFenceKeyChange={handleRailFenceKeyChange}
-          onAction={processCipher}
-        />
-        
-        {/* Only show regular output components if not using Rail Fence cipher */}
-        {cipherType !== "railfence" && (
-          <>
-            <OutputEncrypt cipherText={cipherText} display={displayEncrypted} />
-            <OutputDecrypt plainText={plainText} display={displayDecrypted} />
-          </>
-        )}
-
-        {/* Rail Fence Pattern Visualization with Copy Button */}
-        {railFencePattern && (
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 transition-all duration-300">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">Rail Fence Pattern:</h3>
-              <CopyButton text={railFencePattern} />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+      {/* Navigation Bar */}
+      <nav className="bg-white dark:bg-gray-800 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <h1
+                onClick={() => window.location.reload()}
+                className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight cursor-pointer transition-all duration-200"
+              >
+                <ScrambleText 
+                  text="CipherHub"
+                  className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 hover:from-indigo-500 hover:to-purple-500"
+                />
+              </h1>
             </div>
-            <pre className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg overflow-auto text-gray-800 dark:text-gray-100 font-mono">
-              {railFencePattern}
-            </pre>
-          </div>
-        )}
-
-        {/* Show Rail Fence results in a specific format when using Rail Fence cipher with Copy Button */}
-        {cipherType === "railfence" && (displayEncrypted || displayDecrypted) && (
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 transition-all duration-300">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">
-                {displayEncrypted ? "Encrypted Text:" : "Decrypted Text:"}
-              </h3>
-              <CopyButton text={displayEncrypted ? cipherText : plainText} />
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-gray-800 dark:text-gray-100 break-words">
-              {displayEncrypted ? cipherText : plainText}
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                {theme === "light" ? "🌙 Dark" : "☀️ Light"}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      </nav>
 
-        {errorMessage && (
-          <p className="text-red-600 dark:text-red-400 mt-6 text-center font-medium bg-red-50 dark:bg-red-900/30 py-3 px-6 rounded-lg shadow-md">
-            {errorMessage}
-          </p>
-        )}
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Input */}
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Input Text</h2>
+              <UploadForm
+                onUpload={setPlainText}
+                onTextChange={(text) => {
+                  setPlainText(text);
+                  resetDisplay();
+                }}
+              />
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Cipher Settings</h2>
+              <CipherForm
+                onCipherChange={(cipher) => {
+                  setCipherType(cipher);
+                  resetDisplay();
+                }}
+                onKeyChange={(key) => {
+                  setKey(key);
+                  resetDisplay();
+                }}
+                onVigenereKeyChange={(key) => {
+                  setVigenereKey(key);
+                  resetDisplay();
+                }}
+                onTranspositionKeyChange={(key) => {
+                  setTranspositionKey(key);
+                  resetDisplay();
+                }}
+                onAffineKeyChange={(type, value) => {
+                  handleKeyChange(type, value);
+                  resetDisplay();
+                }}
+                onHillKeyChange={(row, col, value) => {
+                  handleHillKeyChange(row, col, value);
+                  resetDisplay();
+                }}
+                onRailFenceKeyChange={handleRailFenceKeyChange}
+                onAction={processCipher}
+              />
+            </div>
+          </div>
+
+          {/* Right Column - Output */}
+          <div className="space-y-6">
+            {cipherType !== "railfence" && (
+              <>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300">
+                  <OutputEncrypt cipherText={cipherText} display={displayEncrypted} />
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300">
+                  <OutputDecrypt plainText={plainText} display={displayDecrypted} />
+                </div>
+              </>
+            )}
+
+            {railFencePattern && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">Rail Fence Pattern:</h3>
+                  <CopyButton text={railFencePattern} />
+                </div>
+                <pre className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg overflow-auto text-gray-800 dark:text-gray-100 font-mono">
+                  {railFencePattern}
+                </pre>
+              </div>
+            )}
+
+            {cipherType === "railfence" && (displayEncrypted || displayDecrypted) && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">
+                    {displayEncrypted ? "Encrypted Text:" : "Decrypted Text:"}
+                  </h3>
+                  <CopyButton text={displayEncrypted ? cipherText : plainText} />
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-gray-800 dark:text-gray-100 break-words">
+                  {displayEncrypted ? cipherText : plainText}
+                </div>
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="bg-red-50 dark:bg-red-900/30 rounded-xl p-4 shadow-lg">
+                <p className="text-red-600 dark:text-red-400 text-center font-medium">
+                  {errorMessage}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
-      <footer className="py-6 w-full bg-gray-800 dark:bg-gray-950 text-gray-200 dark:text-gray-300 text-center">
-        <p className="text-sm">
-          Created by{" "}
-          <a
-            href="https://github.com/pataanggs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors duration-200"
-          >
-            Pataangg
-          </a>{" "}
-          | CipherHub © {new Date().getFullYear()}
-        </p>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 dark:bg-gray-950 text-gray-200 dark:text-gray-300 py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <p className="text-sm">
+              Created by{" "}
+              <a
+                href="https://github.com/pataanggs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors duration-200"
+              >
+                Pataangg
+              </a>
+            </p>
+            <p className="text-xs text-gray-400">
+              A modern cipher encryption/decryption tool
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   );
